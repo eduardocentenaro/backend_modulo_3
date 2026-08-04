@@ -1,14 +1,16 @@
+import "dotenv/config";
+
 import express from "express";
 import cors from "cors";
 
 import { PORT_SERVER } from "./constants/server.js";
 import { AppDataSource } from "./config/database_postgres.js";
 
-import { captureLog } from "./middlewares/captureLog.js";
-import { errorHandler } from "./middlewares/errorHandler.js";
-import { validateJwtHandler } from "./middlewares/validateJwtHandler.js";
+import { captureLog } from "./middlewares/global/captureLog.js";
+import { errorHandler } from "./middlewares/global/errorHandler.js";
+import { validateJwtHandler } from "./middlewares/auth/validateJwtHandler.js";
 
-import authRoutes from "./routes/auth.routes.js";
+import usersRoutes from "./routes/users.routes.js";
 import publicRoutes from "./routes/public.routes.js";
 
 const app = express();
@@ -20,7 +22,7 @@ app.use(captureLog); // aplicando o middleware de forma global no inicio de cada
 app.use(publicRoutes);
 
 app.use(validateJwtHandler); // aplicar o token em todas as rotas abaixo
-app.use(authRoutes);
+app.use(usersRoutes);
 
 app.use(errorHandler); // aplicando o middleware de forma global no fim de cada rota
 

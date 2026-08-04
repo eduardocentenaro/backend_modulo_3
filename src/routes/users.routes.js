@@ -1,5 +1,5 @@
 import { response, Router } from "express";
-import { asyncHandler } from "../middlewares/asyncHandler.js";
+import { asyncHandler } from "../middlewares/global/asyncHandler.js";
 import { AppDataSource } from "../config/database_postgres.js";
 import { UsuarioEntity } from "../entidades/Usuario.js";
 import { BAD_REQUEST_STATUS, NO_CONTENT_STATUS } from "../constants/server.js";
@@ -18,6 +18,7 @@ usersRoutes.put(
       response
         .status(BAD_REQUEST_STATUS)
         .send({ error: "A senha é obrigatorio" });
+      return;
     }
 
     const novaSenhaHash = await bcrypt.hash(
