@@ -1,89 +1,136 @@
-CREATE TABLE "mesas"(
-    "id" SERIAL NOT NULL,
-    "nome" VARCHAR(50) NOT NULL,
-    "reservado" BOOLEAN NOT NULL DEFAULT FALSE,
-    "quantidade_lugares" INTEGER NULL,
-    "criado_em" TIMESTAMP(0) WITH
-        TIME zone NOT NULL DEFAULT NOW(), "atualizado_em" TIMESTAMP(0)
-    WITH
-        TIME zone NOT NULL DEFAULT NOW());
-ALTER TABLE
-    "mesas" ADD PRIMARY KEY("id");
-CREATE TABLE "items_cardapio"(
+CREATE TABLE "pets"(
     "id" SERIAL NOT NULL,
     "nome" VARCHAR(100) NOT NULL,
-    "preco" DECIMAL(10, 2) NOT NULL,
-    "tipo" VARCHAR(100) NOT NULL,
-    "porcoes" INTEGER NOT NULL,
-    "tamanho" VARCHAR(255) CHECK
-        ("tamanho" IN('P', 'M', 'G')) NOT NULL,
-        "vegetariano" BOOLEAN NOT NULL DEFAULT FALSE,
-        "descricao" TEXT NULL,
+    "tipo_id" INTEGER NOT NULL,
+    "raca_id" INTEGER NOT NULL,
+    "cor_id" INTEGER NOT NULL,
+    "porte" VARCHAR(255) CHECK
+        ("porte" IN('P', 'M', 'G')) NOT NULL,
+        "sexo" VARCHAR(255)
+    CHECK
+        ("sexo" IN('M', 'F')) NOT NULL,
+        "foto_url" VARCHAR(255) NULL,
+        "historia" TEXT NULL,
+        "comportamento" TEXT NULL,
+        "observacoes_extras" TEXT NULL,
+        "idade_meses" INTEGER NULL,
         "criado_em" TIMESTAMP(0)
     WITH
         TIME zone NOT NULL DEFAULT NOW(), "atualizado_em" TIMESTAMP(0)
     WITH
         TIME zone NOT NULL DEFAULT NOW());
 ALTER TABLE
-    "items_cardapio" ADD PRIMARY KEY("id");
-CREATE TABLE "chefs"(
+    "pets" ADD PRIMARY KEY("id");
+CREATE TABLE "tipos"(
     "id" SERIAL NOT NULL,
     "nome" VARCHAR(100) NOT NULL,
-    "faz_sobremesa" BOOLEAN NOT NULL DEFAULT FALSE,
-    "especializacao" TEXT NULL,
     "criado_em" TIMESTAMP(0) WITH
         TIME zone NOT NULL DEFAULT NOW(), "atualizado_em" TIMESTAMP(0)
     WITH
         TIME zone NOT NULL DEFAULT NOW());
 ALTER TABLE
-    "chefs" ADD PRIMARY KEY("id");
-CREATE TABLE "pedidos"(
+    "tipos" ADD PRIMARY KEY("id");
+ALTER TABLE
+    "tipos" ADD CONSTRAINT "tipos_nome_unique" UNIQUE("nome");
+CREATE TABLE "racas"(
     "id" SERIAL NOT NULL,
-    "nome_cliente" VARCHAR(100) NOT NULL,
-    "mesa_id" INTEGER NOT NULL,
-    "fechado" BOOLEAN NOT NULL DEFAULT FALSE,
-    "data" DATE NOT NULL,
-    "total" DECIMAL(10, 2) NULL,
+    "nome" VARCHAR(100) NOT NULL,
     "criado_em" TIMESTAMP(0) WITH
         TIME zone NOT NULL DEFAULT NOW(), "atualizado_em" TIMESTAMP(0)
     WITH
         TIME zone NOT NULL DEFAULT NOW());
 ALTER TABLE
-    "pedidos" ADD PRIMARY KEY("id");
-CREATE TABLE "agenda_chefs"(
+    "racas" ADD PRIMARY KEY("id");
+ALTER TABLE
+    "racas" ADD CONSTRAINT "racas_nome_unique" UNIQUE("nome");
+CREATE TABLE "cores"(
     "id" SERIAL NOT NULL,
-    "chef_id" INTEGER NOT NULL,
-    "semana" INTEGER NOT NULL,
-    "mes" BIGINT NOT NULL,
-    "segunda" BOOLEAN NOT NULL DEFAULT FALSE,
-    "terca" BOOLEAN NOT NULL DEFAULT FALSE,
-    "quarta" BOOLEAN NOT NULL DEFAULT FALSE,
-    "quinta" BOOLEAN NOT NULL DEFAULT FALSE,
-    "sexta" BOOLEAN NOT NULL DEFAULT FALSE,
-    "sabado" BOOLEAN NOT NULL DEFAULT FALSE,
-    "domingo" BOOLEAN NOT NULL DEFAULT FALSE,
+    "nome" VARCHAR(100) NOT NULL,
     "criado_em" TIMESTAMP(0) WITH
         TIME zone NOT NULL DEFAULT NOW(), "atualizado_em" TIMESTAMP(0)
     WITH
         TIME zone NOT NULL DEFAULT NOW());
 ALTER TABLE
-    "agenda_chefs" ADD PRIMARY KEY("id");
-CREATE TABLE "items_pedidos"(
+    "cores" ADD PRIMARY KEY("id");
+ALTER TABLE
+    "cores" ADD CONSTRAINT "cores_nome_unique" UNIQUE("nome");
+CREATE TABLE "adocoes"(
     "id" SERIAL NOT NULL,
-    "pedido_id" INTEGER NOT NULL,
-    "item_cardapio_id" INTEGER NOT NULL,
-    "quantidade" INTEGER NOT NULL,
+    "pet_id" INTEGER NOT NULL,
+    "lar_adotivo_id" INTEGER NOT NULL,
     "criado_em" TIMESTAMP(0) WITH
         TIME zone NOT NULL DEFAULT NOW(), "atualizado_em" TIMESTAMP(0)
     WITH
         TIME zone NOT NULL DEFAULT NOW());
 ALTER TABLE
-    "items_pedidos" ADD PRIMARY KEY("id");
+    "adocoes" ADD PRIMARY KEY("id");
+CREATE TABLE "lares_adotivos"(
+    "id" SERIAL NOT NULL,
+    "nome" VARCHAR(150) NOT NULL,
+    "cep" VARCHAR(20) NOT NULL,
+    "estado" VARCHAR(2) NOT NULL,
+    "cidade" VARCHAR(100) NOT NULL,
+    "bairro" VARCHAR(50) NOT NULL,
+    "rua" VARCHAR(100) NOT NULL,
+    "possui_telas_protecao" BOOLEAN NOT NULL DEFAULT FALSE,
+    "tipo" VARCHAR(255) CHECK
+        (
+            "tipo" IN('DEFINITIVO', 'TEMPORARIO')
+        ) NOT NULL DEFAULT 'DEFINITIVO',
+        "telefone" VARCHAR(20) NOT NULL,
+        "criado_em" TIMESTAMP(0)
+    WITH
+        TIME zone NOT NULL DEFAULT NOW(), "atualizado_em" TIMESTAMP(0)
+    WITH
+        TIME zone NOT NULL DEFAULT NOW());
 ALTER TABLE
-    "agenda_chefs" ADD CONSTRAINT "agenda_chefs_chef_id_foreign" FOREIGN KEY("chef_id") REFERENCES "chefs"("id");
+    "lares_adotivos" ADD PRIMARY KEY("id");
+CREATE TABLE "adocoes_historico"(
+    "id" SERIAL NOT NULL,
+    "status" VARCHAR(255) CHECK
+        (
+            "status" IN(
+                'ANALISE',
+                'CONCLUIDO',
+                'FINALIZADO',
+                'CANCELADO',
+                'REPROVADO'
+            )
+        ) NOT NULL,
+        "observacao" TEXT NOT NULL,
+        "adocao_id" INTEGER NOT NULL,
+        "criado_em" TIMESTAMP(0)
+    WITH
+        TIME zone NOT NULL DEFAULT NOW(), "atualizado_em" TIMESTAMP(0)
+    WITH
+        TIME zone NOT NULL DEFAULT NOW());
 ALTER TABLE
-    "items_pedidos" ADD CONSTRAINT "items_pedidos_item_cardapio_id_foreign" FOREIGN KEY("item_cardapio_id") REFERENCES "items_cardapio"("id");
+    "adocoes_historico" ADD PRIMARY KEY("id");
+CREATE TABLE "usuarios"(
+    "id" SERIAL NOT NULL,
+    "nome" VARCHAR(50) NOT NULL,
+    "email" VARCHAR(150) NOT NULL,
+    "senha" VARCHAR(100) NOT NULL,
+    "role" VARCHAR(255) CHECK
+        ("role" IN('admin', 'funcionario')) NOT NULL,
+        "criado_em" TIMESTAMP(0)
+    WITH
+        TIME zone NOT NULL DEFAULT NOW(), "atualizado_em" TIMESTAMP(0)
+    WITH
+        TIME zone NOT NULL DEFAULT NOW());
 ALTER TABLE
-    "items_pedidos" ADD CONSTRAINT "items_pedidos_pedido_id_foreign" FOREIGN KEY("pedido_id") REFERENCES "pedidos"("id");
+    "usuarios" ADD PRIMARY KEY("id");
 ALTER TABLE
-    "pedidos" ADD CONSTRAINT "pedidos_mesa_id_foreign" FOREIGN KEY("mesa_id") REFERENCES "mesas"("id");
+    "usuarios" ADD CONSTRAINT "usuarios_email_unique" UNIQUE("email");
+ALTER TABLE
+    "pets" ADD CONSTRAINT "pets_cor_id_foreign" FOREIGN KEY("cor_id") REFERENCES "cores"("id");
+ALTER TABLE
+    "adocoes_historico" ADD CONSTRAINT "adocoes_historico_adocao_id_foreign" FOREIGN KEY("adocao_id") REFERENCES "adocoes"("id");
+ALTER TABLE
+    "pets" ADD CONSTRAINT "pets_tipo_id_foreign" FOREIGN KEY("tipo_id") REFERENCES "tipos"("id");
+ALTER TABLE
+    "pets" ADD CONSTRAINT "pets_raca_id_foreign" FOREIGN KEY("raca_id") REFERENCES "racas"("id");
+ALTER TABLE
+    "adocoes" ADD CONSTRAINT "adocoes_lar_adotivo_id_foreign" FOREIGN KEY("lar_adotivo_id") REFERENCES "lares_adotivos"("id");
+ALTER TABLE
+    "adocoes" ADD CONSTRAINT "adocoes_pet_id_foreign" FOREIGN KEY("pet_id") REFERENCES "pets"("id");

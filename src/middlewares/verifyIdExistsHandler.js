@@ -16,7 +16,7 @@ export const verifyIdExistsHandler =
         .send({ error: `${nomeAmigavel} não encontrado(a)` });
     }
 
-    request.cachorro = registro;
+    request.resgistro = registro;
 
     next();
   };
