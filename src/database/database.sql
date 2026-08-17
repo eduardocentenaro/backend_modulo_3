@@ -18,7 +18,9 @@ CREATE TABLE "pets"(
     WITH
         TIME zone NOT NULL DEFAULT NOW(), "atualizado_em" TIMESTAMP(0)
     WITH
-        TIME zone NOT NULL DEFAULT NOW());
+        TIME zone NOT NULL DEFAULT NOW(), "deletado_em" TIMESTAMP(0)
+    WITH
+        TIME zone NULL);
 ALTER TABLE
     "pets" ADD PRIMARY KEY("id");
 CREATE TABLE "tipos"(

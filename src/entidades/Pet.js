@@ -57,6 +57,10 @@ export const PetEntity = new EntitySchema({
       nullable: false,
       default: () => "CURRENT_TIMESTAMP",
     },
+    deletado_em: {
+      type: "timestamp with time zone",
+      nullable: true,
+    },
   },
   relations: {
     tipo: {

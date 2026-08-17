@@ -1,8 +1,17 @@
 import { Router } from "express";
 import { asyncHandler } from "../middlewares/global/asyncHandler.js";
 import { AppDataSource } from "../config/database_postgres.js";
-import { BAD_REQUEST_STATUS, CREATED_STATUS, OK_STATUS } from "../constants/server.js";
+import { IsNull } from "typeorm";
+import {
+  BAD_REQUEST_STATUS,
+  CREATED_STATUS,
+  OK_STATUS,
+  NO_CONTENT_STATUS,
+  NOT_FOUND_STATUS,
+  CONFLICT_STATUS,
+} from "../constants/server.js";
 import { PetEntity } from "../entidades/Pet.js";
+import { AdocaoEntity } from "../entidades/Adocao.js";
 import { PORTES_VALIDOS } from "../constants/porte.js";
 import { SEXOS_VALIDOS } from "../constants/sexo.js";
 import { ROLES } from "../constants/roles.js";
@@ -11,6 +20,7 @@ import { verifyIdExistsHandler } from "../middlewares/verifyIdExistsHandler.js";
 
 const petsRoutes = new Router();
 const petRepository = AppDataSource.getRepository(PetEntity);
+const adocaoRepository = AppDataSource.getRepository(AdocaoEntity);
 
 petsRoutes.post(
   "/pets",
@@ -96,6 +106,7 @@ petsRoutes.get(
   autorizarHandler(ROLES.ADMIN, ROLES.FUNCIONARIO),
   asyncHandler(async (request, response) => {
     const pets = await petRepository.find({
+      where: { deletado_em: IsNull() },
       relations: {
         tipo: true,
         raca: true,
@@ -112,6 +123,11 @@ petsRoutes.get(
   autorizarHandler(ROLES.ADMIN, ROLES.FUNCIONARIO),
   verifyIdExistsHandler(PetEntity, "Pet"),
   asyncHandler(async (request, response) => {
+    if (request.resgistro.deletado_em) {
+      response.status(NOT_FOUND_STATUS).send({ error: "Pet não encontrado(a)" });
+      return;
+    }
+
     response.status(OK_STATUS).send(request.resgistro);
   }),
 );
@@ -121,6 +137,11 @@ petsRoutes.put(
   autorizarHandler(ROLES.ADMIN, ROLES.FUNCIONARIO),
   verifyIdExistsHandler(PetEntity, "Pet"),
   asyncHandler(async (request, response) => {
+    if (request.resgistro.deletado_em) {
+      response.status(NOT_FOUND_STATUS).send({ error: "Pet não encontrado(a)" });
+      return;
+    }
+
     const dados = request.body;
 
     if (dados.nome !== undefined && !dados.nome) {
@@ -197,6 +218,33 @@ petsRoutes.put(
     const petSalvo = await petRepository.save(petAtualizado);
 
     response.status(OK_STATUS).send(petSalvo);
+  }),
+);
+
+petsRoutes.delete(
+  "/pets/:id",
+  autorizarHandler(ROLES.ADMIN),
+  verifyIdExistsHandler(PetEntity, "Pet"),
+  asyncHandler(async (request, response) => {
+    if (request.resgistro.deletado_em) {
+      response.status(NOT_FOUND_STATUS).send({ error: "Pet não encontrado(a)" });
+      return;
+    }
+
+    const adocaoDoPet = await adocaoRepository.findOneBy({
+      pet: { id: request.resgistro.id },
+    });
+
+    if (adocaoDoPet) {
+      response
+        .status(CONFLICT_STATUS)
+        .send({ error: "pet está vinculado a uma adoção e não pode ser deletado" });
+      return;
+    }
+
+    await petRepository.update(request.resgistro.id, { deletado_em: new Date() });
+
+    response.status(NO_CONTENT_STATUS).send();
   }),
 );
 
