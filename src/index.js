@@ -13,6 +13,7 @@ import { validateJwtHandler } from "./middlewares/auth/validateJwtHandler.js";
 import usersRoutes from "./routes/users.routes.js";
 import publicRoutes from "./routes/public.routes.js";
 import petsRoutes from "./routes/pets.routes.js";
+import laresRoutes from "./routes/lares.routes.js";
 
 const app = express();
 app.use(express.json()); // habilita o servidor para reconhecer formato JSON
@@ -25,6 +26,7 @@ app.use(publicRoutes);
 app.use(validateJwtHandler); // aplicar o token em todas as rotas abaixo
 app.use(usersRoutes);
 app.use(petsRoutes);
+app.use(laresRoutes);
 
 app.use(errorHandler); // aplicando o middleware de forma global no fim de cada rota
 
