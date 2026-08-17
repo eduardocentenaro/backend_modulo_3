@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../middlewares/global/asyncHandler.js";
 import { AppDataSource } from "../config/database_postgres.js";
-import { BAD_REQUEST_STATUS, CREATED_STATUS } from "../constants/server.js";
+import { BAD_REQUEST_STATUS, CREATED_STATUS, OK_STATUS } from "../constants/server.js";
 import { LarAdotivoEntity } from "../entidades/LarAdotivo.js";
 import { TIPOS_LAR_VALIDOS } from "../constants/tipoLar.js";
 import { ROLES } from "../constants/roles.js";
@@ -80,6 +80,33 @@ laresRoutes.post(
     });
 
     response.status(CREATED_STATUS).send(novoLar);
+  }),
+);
+
+laresRoutes.get(
+  "/lares-adotivos",
+  autorizarHandler(ROLES.ADMIN, ROLES.FUNCIONARIO),
+  asyncHandler(async (request, response) => {
+    const { estado, tipo } = request.query;
+
+    const where = {};
+
+    if (estado) {
+      where.estado = estado;
+    }
+
+    if (tipo) {
+      where.tipo = tipo;
+    }
+
+    const lares = await larAdotivoRepository.find({
+      where,
+      order: {
+        criado_em: "ASC",
+      },
+    });
+
+    response.status(OK_STATUS).send(lares);
   }),
 );
 
