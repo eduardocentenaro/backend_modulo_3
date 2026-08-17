@@ -8,7 +8,7 @@ CREATE TABLE "pets"(
         ("porte" IN('P', 'M', 'G')) NOT NULL,
         "sexo" VARCHAR(255)
     CHECK
-        ("sexo" IN('M', 'F')) NOT NULL,
+        ("sexo" IN('M', 'F')),
         "foto_url" VARCHAR(255) NULL,
         "historia" TEXT NULL,
         "comportamento" TEXT NULL,

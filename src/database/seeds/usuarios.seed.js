@@ -8,7 +8,7 @@ export const usuarioSeed = async () => {
     await AppDataSource.initialize();
 
     const usuarioRepository = AppDataSource.getRepository(UsuarioEntity);
-    const emailAdmin = "admin@restaurante.com";
+    const emailAdmin = "admin@projeto.com";
 
     const usuarioExistente = await usuarioRepository.findOneBy({
       email: emailAdmin,

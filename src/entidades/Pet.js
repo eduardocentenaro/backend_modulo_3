@@ -24,7 +24,7 @@ export const PetEntity = new EntitySchema({
     sexo: {
       type: "enum",
       enum: SEXOS_VALIDOS,
-      nullable: false,
+      nullable: true,
     },
     foto_url: {
       type: "varchar",
