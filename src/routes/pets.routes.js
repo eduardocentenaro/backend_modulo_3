@@ -7,6 +7,7 @@ import { PORTES_VALIDOS } from "../constants/porte.js";
 import { SEXOS_VALIDOS } from "../constants/sexo.js";
 import { ROLES } from "../constants/roles.js";
 import { autorizarHandler } from "../middlewares/auth/autorizarHandler.js";
+import { verifyIdExistsHandler } from "../middlewares/verifyIdExistsHandler.js";
 
 const petsRoutes = new Router();
 const petRepository = AppDataSource.getRepository(PetEntity);
@@ -103,6 +104,15 @@ petsRoutes.get(
     });
 
     response.status(OK_STATUS).send(pets);
+  }),
+);
+
+petsRoutes.get(
+  "/pets/:id",
+  autorizarHandler(ROLES.ADMIN, ROLES.FUNCIONARIO),
+  verifyIdExistsHandler(PetEntity, "Pet"),
+  asyncHandler(async (request, response) => {
+    response.status(OK_STATUS).send(request.resgistro);
   }),
 );
 
