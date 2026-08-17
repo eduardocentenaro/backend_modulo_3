@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../middlewares/global/asyncHandler.js";
 import { AppDataSource } from "../config/database_postgres.js";
-import { BAD_REQUEST_STATUS, CREATED_STATUS } from "../constants/server.js";
+import { BAD_REQUEST_STATUS, CREATED_STATUS, OK_STATUS } from "../constants/server.js";
 import { PetEntity } from "../entidades/Pet.js";
 import { PORTES_VALIDOS } from "../constants/porte.js";
 import { SEXOS_VALIDOS } from "../constants/sexo.js";
@@ -87,6 +87,22 @@ petsRoutes.post(
     });
 
     response.status(CREATED_STATUS).send(novoPet);
+  }),
+);
+
+petsRoutes.get(
+  "/pets",
+  autorizarHandler(ROLES.ADMIN, ROLES.FUNCIONARIO),
+  asyncHandler(async (request, response) => {
+    const pets = await petRepository.find({
+      relations: {
+        tipo: true,
+        raca: true,
+        cor: true,
+      },
+    });
+
+    response.status(OK_STATUS).send(pets);
   }),
 );
 
