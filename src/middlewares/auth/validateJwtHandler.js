@@ -7,6 +7,7 @@ export function validateJwtHandler(request, response, next) {
   // verificar se token não chegou (undefined)
   if (!header) {
     response.status(UNAUTHORIZED_STATUS).send({ error: "token ausente" });
+    return;
   }
 
   const token = header.split(" ")[1]; // obtem a parte util do token

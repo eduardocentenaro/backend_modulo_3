@@ -116,4 +116,88 @@ petsRoutes.get(
   }),
 );
 
+petsRoutes.put(
+  "/pets/:id",
+  autorizarHandler(ROLES.ADMIN, ROLES.FUNCIONARIO),
+  verifyIdExistsHandler(PetEntity, "Pet"),
+  asyncHandler(async (request, response) => {
+    const dados = request.body;
+
+    if (dados.nome !== undefined && !dados.nome) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "nome não pode ser vazio" });
+      return;
+    }
+
+    if (dados.tipo_id !== undefined && !dados.tipo_id) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "tipo_id não pode ser vazio" });
+      return;
+    }
+
+    if (dados.raca_id !== undefined && !dados.raca_id) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "raca_id não pode ser vazio" });
+      return;
+    }
+
+    if (dados.cor_id !== undefined && !dados.cor_id) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "cor_id não pode ser vazio" });
+      return;
+    }
+
+    if (dados.porte !== undefined && !PORTES_VALIDOS.includes(dados.porte)) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "porte deve ser P, M ou G" });
+      return;
+    }
+
+    if (dados.sexo && !SEXOS_VALIDOS.includes(dados.sexo)) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "sexo deve ser M ou F" });
+      return;
+    }
+
+    if (dados.foto_url && typeof dados.foto_url !== "string") {
+      response.status(BAD_REQUEST_STATUS).send({ error: "foto_url deve ser uma string" });
+      return;
+    }
+
+    if (dados.historia && typeof dados.historia !== "string") {
+      response.status(BAD_REQUEST_STATUS).send({ error: "historia deve ser uma string" });
+      return;
+    }
+
+    if (dados.comportamento && typeof dados.comportamento !== "string") {
+      response.status(BAD_REQUEST_STATUS).send({ error: "comportamento deve ser uma string" });
+      return;
+    }
+
+    if (dados.observacoes_extras && typeof dados.observacoes_extras !== "string") {
+      response.status(BAD_REQUEST_STATUS).send({ error: "observacoes_extras deve ser uma string" });
+      return;
+    }
+
+    if (dados.idade_meses && !Number.isInteger(dados.idade_meses)) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "idade_meses deve ser um número inteiro" });
+      return;
+    }
+
+    const petAtualizado = {
+      id: request.resgistro.id,
+    };
+
+    if (dados.nome !== undefined) petAtualizado.nome = dados.nome;
+    if (dados.tipo_id !== undefined) petAtualizado.tipo = { id: dados.tipo_id };
+    if (dados.raca_id !== undefined) petAtualizado.raca = { id: dados.raca_id };
+    if (dados.cor_id !== undefined) petAtualizado.cor = { id: dados.cor_id };
+    if (dados.porte !== undefined) petAtualizado.porte = dados.porte;
+    if (dados.sexo !== undefined) petAtualizado.sexo = dados.sexo;
+    if (dados.foto_url !== undefined) petAtualizado.foto_url = dados.foto_url;
+    if (dados.historia !== undefined) petAtualizado.historia = dados.historia;
+    if (dados.comportamento !== undefined) petAtualizado.comportamento = dados.comportamento;
+    if (dados.observacoes_extras !== undefined) petAtualizado.observacoes_extras = dados.observacoes_extras;
+    if (dados.idade_meses !== undefined) petAtualizado.idade_meses = dados.idade_meses;
+
+    const petSalvo = await petRepository.save(petAtualizado);
+
+    response.status(OK_STATUS).send(petSalvo);
+  }),
+);
+
 export default petsRoutes;
