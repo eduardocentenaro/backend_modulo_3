@@ -12,15 +12,19 @@ import {
 } from "../constants/server.js";
 import { PetEntity } from "../entidades/Pet.js";
 import { AdocaoEntity } from "../entidades/Adocao.js";
+import { AdocaoHistoricoEntity } from "../entidades/AdocaoHistorico.js";
+import { LarAdotivoEntity } from "../entidades/LarAdotivo.js";
 import { PORTES_VALIDOS } from "../constants/porte.js";
 import { SEXOS_VALIDOS } from "../constants/sexo.js";
 import { ROLES } from "../constants/roles.js";
+import { STATUS_ADOCAO } from "../constants/statusAdocao.js";
 import { autorizarHandler } from "../middlewares/auth/autorizarHandler.js";
 import { verifyIdExistsHandler } from "../middlewares/verifyIdExistsHandler.js";
 
 const petsRoutes = new Router();
 const petRepository = AppDataSource.getRepository(PetEntity);
 const adocaoRepository = AppDataSource.getRepository(AdocaoEntity);
+const adocaoHistoricoRepository = AppDataSource.getRepository(AdocaoHistoricoEntity);
 
 petsRoutes.post(
   "/pets",
@@ -113,6 +117,26 @@ petsRoutes.get(
         cor: true,
       },
     });
+
+    for (const pet of pets) {
+      const adocoesDoPet = await adocaoRepository.find({
+        where: { pet: { id: pet.id } },
+        relations: { historico: true, larAdotivo: true },
+      });
+
+      pet.lar_adotivo = null;
+
+      for (const adocao of adocoesDoPet) {
+        const historicoOrdenado = [...adocao.historico].sort(
+          (a, b) => new Date(b.criado_em) - new Date(a.criado_em),
+        );
+        const ultimoStatus = historicoOrdenado[0]?.status;
+
+        if (ultimoStatus === STATUS_ADOCAO.FINALIZADO) {
+          pet.lar_adotivo = adocao.larAdotivo;
+        }
+      }
+    }
 
     response.status(OK_STATUS).send(pets);
   }),
@@ -245,6 +269,75 @@ petsRoutes.delete(
     await petRepository.update(request.resgistro.id, { deletado_em: new Date() });
 
     response.status(NO_CONTENT_STATUS).send();
+  }),
+);
+
+petsRoutes.post(
+  "/pets/adotar",
+  autorizarHandler(ROLES.ADMIN),
+  (request, response, next) => {
+    request.params.id = request.body.pet_id;
+    next();
+  },
+  verifyIdExistsHandler(PetEntity, "Pet"),
+  (request, response, next) => {
+    request.petParaAdocao = request.resgistro;
+    request.params.id = request.body.lar_adotivo_id;
+    next();
+  },
+  verifyIdExistsHandler(LarAdotivoEntity, "Lar adotivo"),
+  asyncHandler(async (request, response) => {
+    const pet = request.petParaAdocao;
+    const lar = request.resgistro;
+    const dados = request.body;
+
+    if (pet.deletado_em) {
+      response.status(NOT_FOUND_STATUS).send({ error: "Pet não encontrado(a)" });
+      return;
+    }
+
+    if (!dados.observacoes) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "observacoes é obrigatório" });
+      return;
+    }
+
+    const statusBloqueados = [
+      STATUS_ADOCAO.ANALISE,
+      STATUS_ADOCAO.CONCLUIDO,
+      STATUS_ADOCAO.FINALIZADO,
+    ];
+
+    const adocoesDoPet = await adocaoRepository.find({
+      where: { pet: { id: pet.id } },
+      relations: { historico: true },
+    });
+
+    for (const adocao of adocoesDoPet) {
+      const historicoOrdenado = [...adocao.historico].sort(
+        (a, b) => new Date(b.criado_em) - new Date(a.criado_em),
+      );
+      const ultimoStatus = historicoOrdenado[0]?.status;
+
+      if (statusBloqueados.includes(ultimoStatus)) {
+        response.status(CONFLICT_STATUS).send({
+          error: "este pet já está vinculado a uma adoção em andamento ou concluída",
+        });
+        return;
+      }
+    }
+
+    const novaAdocao = await adocaoRepository.save({
+      pet,
+      larAdotivo: lar,
+    });
+
+    await adocaoHistoricoRepository.save({
+      adocao: novaAdocao,
+      status: STATUS_ADOCAO.ANALISE,
+      observacao: dados.observacoes,
+    });
+
+    response.status(CREATED_STATUS).send(novaAdocao);
   }),
 );
 

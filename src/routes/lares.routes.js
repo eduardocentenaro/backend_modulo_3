@@ -3,13 +3,16 @@ import { asyncHandler } from "../middlewares/global/asyncHandler.js";
 import { AppDataSource } from "../config/database_postgres.js";
 import { BAD_REQUEST_STATUS, CREATED_STATUS, OK_STATUS } from "../constants/server.js";
 import { LarAdotivoEntity } from "../entidades/LarAdotivo.js";
+import { AdocaoEntity } from "../entidades/Adocao.js";
 import { TIPOS_LAR_VALIDOS } from "../constants/tipoLar.js";
 import { ROLES } from "../constants/roles.js";
+import { STATUS_ADOCAO } from "../constants/statusAdocao.js";
 import { autorizarHandler } from "../middlewares/auth/autorizarHandler.js";
 import { verifyIdExistsHandler } from "../middlewares/verifyIdExistsHandler.js";
 
 const laresRoutes = new Router();
 const larAdotivoRepository = AppDataSource.getRepository(LarAdotivoEntity);
+const adocaoRepository = AppDataSource.getRepository(AdocaoEntity);
 
 laresRoutes.post(
   "/lares-adotivos",
@@ -106,6 +109,28 @@ laresRoutes.get(
         criado_em: "ASC",
       },
     });
+
+    for (const lar of lares) {
+      const adocoesDoLar = await adocaoRepository.find({
+        where: { larAdotivo: { id: lar.id } },
+        relations: { historico: true, pet: true },
+      });
+
+      const petsPresentes = [];
+
+      for (const adocao of adocoesDoLar) {
+        const historicoOrdenado = [...adocao.historico].sort(
+          (a, b) => new Date(b.criado_em) - new Date(a.criado_em),
+        );
+        const ultimoStatus = historicoOrdenado[0]?.status;
+
+        if (ultimoStatus === STATUS_ADOCAO.FINALIZADO) {
+          petsPresentes.push(adocao.pet);
+        }
+      }
+
+      lar.pets = petsPresentes;
+    }
 
     response.status(OK_STATUS).send(lares);
   }),
