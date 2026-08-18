@@ -8,7 +8,7 @@ export const usuarioSeed = async () => {
     await AppDataSource.initialize();
 
     const usuarioRepository = AppDataSource.getRepository(UsuarioEntity);
-    const emailAdmin = "admin@restaurante.com";
+    const emailAdmin = "admin@projeto.com";
 
     const usuarioExistente = await usuarioRepository.findOneBy({
       email: emailAdmin,
@@ -22,7 +22,6 @@ export const usuarioSeed = async () => {
     const senhaHash = await bcrypt.hash("admin123", 12);
 
     const novoUsuario = await usuarioRepository.save({
-      id: 1,
       nome: "Administrador",
       email: emailAdmin,
       senha: senhaHash,

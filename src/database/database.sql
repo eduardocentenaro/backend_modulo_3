@@ -8,7 +8,7 @@ CREATE TABLE "pets"(
         ("porte" IN('P', 'M', 'G')) NOT NULL,
         "sexo" VARCHAR(255)
     CHECK
-        ("sexo" IN('M', 'F')) NOT NULL,
+        ("sexo" IN('M', 'F')),
         "foto_url" VARCHAR(255) NULL,
         "historia" TEXT NULL,
         "comportamento" TEXT NULL,
@@ -18,7 +18,9 @@ CREATE TABLE "pets"(
     WITH
         TIME zone NOT NULL DEFAULT NOW(), "atualizado_em" TIMESTAMP(0)
     WITH
-        TIME zone NOT NULL DEFAULT NOW());
+        TIME zone NOT NULL DEFAULT NOW(), "deletado_em" TIMESTAMP(0)
+    WITH
+        TIME zone NULL);
 ALTER TABLE
     "pets" ADD PRIMARY KEY("id");
 CREATE TABLE "tipos"(

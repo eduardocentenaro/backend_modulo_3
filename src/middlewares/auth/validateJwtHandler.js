@@ -7,13 +7,17 @@ export function validateJwtHandler(request, response, next) {
   // verificar se token não chegou (undefined)
   if (!header) {
     response.status(UNAUTHORIZED_STATUS).send({ error: "token ausente" });
+    return;
   }
 
   const token = header.split(" ")[1]; // obtem a parte util do token
 
   // verificar se o token é valido
   try {
-    const conteudoDoToken = jwt.verify(token, process.env.JWT_SECRET);
+    const conteudoDoToken = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "senai2026",
+    );
 
     // colocando dentro da requisicao o perfil do usuario extraido do token
     request.usuario = {

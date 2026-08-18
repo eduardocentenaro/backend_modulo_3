@@ -1,4 +1,4 @@
-export const PORT_SERVER = 8888;
+export const PORT_SERVER = process.env.PORT;
 
 export const OK_STATUS = 200;
 export const CREATED_STATUS = 201;

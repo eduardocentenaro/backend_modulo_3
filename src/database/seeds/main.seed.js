@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { usuarioSeed } from "./usuarios.seed.js";
 import { seedCores } from "./cores.seed.js";
 import { seedRacas } from "./racas.seed.js";
