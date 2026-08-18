@@ -6,6 +6,7 @@ import { LarAdotivoEntity } from "../entidades/LarAdotivo.js";
 import { TIPOS_LAR_VALIDOS } from "../constants/tipoLar.js";
 import { ROLES } from "../constants/roles.js";
 import { autorizarHandler } from "../middlewares/auth/autorizarHandler.js";
+import { verifyIdExistsHandler } from "../middlewares/verifyIdExistsHandler.js";
 
 const laresRoutes = new Router();
 const larAdotivoRepository = AppDataSource.getRepository(LarAdotivoEntity);
@@ -107,6 +108,15 @@ laresRoutes.get(
     });
 
     response.status(OK_STATUS).send(lares);
+  }),
+);
+
+laresRoutes.get(
+  "/lares-adotivos/:id",
+  autorizarHandler(ROLES.ADMIN, ROLES.FUNCIONARIO),
+  verifyIdExistsHandler(LarAdotivoEntity, "Lar adotivo"),
+  asyncHandler(async (request, response) => {
+    response.status(OK_STATUS).send(request.resgistro);
   }),
 );
 
