@@ -14,6 +14,7 @@ import usersRoutes from "./routes/users.routes.js";
 import publicRoutes from "./routes/public.routes.js";
 import petsRoutes from "./routes/pets.routes.js";
 import laresRoutes from "./routes/lares.routes.js";
+import adocoesRoutes from "./routes/adocoes.routes.js";
 
 const app = express();
 app.use(express.json()); // habilita o servidor para reconhecer formato JSON
@@ -27,6 +28,7 @@ app.use(validateJwtHandler); // aplicar o token em todas as rotas abaixo
 app.use(usersRoutes);
 app.use(petsRoutes);
 app.use(laresRoutes);
+app.use(adocoesRoutes);
 
 app.use(errorHandler); // aplicando o middleware de forma global no fim de cada rota
 
