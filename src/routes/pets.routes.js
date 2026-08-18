@@ -127,9 +127,7 @@ petsRoutes.get(
       pet.lar_adotivo = null;
 
       for (const adocao of adocoesDoPet) {
-        const historicoOrdenado = [...adocao.historico].sort(
-          (a, b) => new Date(b.criado_em) - new Date(a.criado_em),
-        );
+        const historicoOrdenado = [...adocao.historico].sort((a, b) => b.id - a.id);
         const ultimoStatus = historicoOrdenado[0]?.status;
 
         if (ultimoStatus === STATUS_ADOCAO.FINALIZADO) {
@@ -223,23 +221,21 @@ petsRoutes.put(
       return;
     }
 
-    const petAtualizado = {
-      id: request.resgistro.id,
-    };
+    const pet = request.resgistro;
 
-    if (dados.nome !== undefined) petAtualizado.nome = dados.nome;
-    if (dados.tipo_id !== undefined) petAtualizado.tipo = { id: dados.tipo_id };
-    if (dados.raca_id !== undefined) petAtualizado.raca = { id: dados.raca_id };
-    if (dados.cor_id !== undefined) petAtualizado.cor = { id: dados.cor_id };
-    if (dados.porte !== undefined) petAtualizado.porte = dados.porte;
-    if (dados.sexo !== undefined) petAtualizado.sexo = dados.sexo;
-    if (dados.foto_url !== undefined) petAtualizado.foto_url = dados.foto_url;
-    if (dados.historia !== undefined) petAtualizado.historia = dados.historia;
-    if (dados.comportamento !== undefined) petAtualizado.comportamento = dados.comportamento;
-    if (dados.observacoes_extras !== undefined) petAtualizado.observacoes_extras = dados.observacoes_extras;
-    if (dados.idade_meses !== undefined) petAtualizado.idade_meses = dados.idade_meses;
+    if (dados.nome !== undefined) pet.nome = dados.nome;
+    if (dados.tipo_id !== undefined) pet.tipo = { id: dados.tipo_id };
+    if (dados.raca_id !== undefined) pet.raca = { id: dados.raca_id };
+    if (dados.cor_id !== undefined) pet.cor = { id: dados.cor_id };
+    if (dados.porte !== undefined) pet.porte = dados.porte;
+    if (dados.sexo !== undefined) pet.sexo = dados.sexo;
+    if (dados.foto_url !== undefined) pet.foto_url = dados.foto_url;
+    if (dados.historia !== undefined) pet.historia = dados.historia;
+    if (dados.comportamento !== undefined) pet.comportamento = dados.comportamento;
+    if (dados.observacoes_extras !== undefined) pet.observacoes_extras = dados.observacoes_extras;
+    if (dados.idade_meses !== undefined) pet.idade_meses = dados.idade_meses;
 
-    const petSalvo = await petRepository.save(petAtualizado);
+    const petSalvo = await petRepository.save(pet);
 
     response.status(OK_STATUS).send(petSalvo);
   }),
@@ -313,9 +309,7 @@ petsRoutes.post(
     });
 
     for (const adocao of adocoesDoPet) {
-      const historicoOrdenado = [...adocao.historico].sort(
-        (a, b) => new Date(b.criado_em) - new Date(a.criado_em),
-      );
+      const historicoOrdenado = [...adocao.historico].sort((a, b) => b.id - a.id);
       const ultimoStatus = historicoOrdenado[0]?.status;
 
       if (statusBloqueados.includes(ultimoStatus)) {

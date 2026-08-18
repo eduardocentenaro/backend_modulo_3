@@ -40,13 +40,13 @@ export const seedTiposPets = async () => {
 
     for (const nome of tiposPets) {
       await AppDataSource.query(
-        `INSERT INTO tipos_pets (nome) VALUES ($1) ON CONFLICT (nome) DO NOTHING`,
+        `INSERT INTO tipos (nome) VALUES ($1) ON CONFLICT (nome) DO NOTHING`,
         [nome],
       );
     }
 
     const [{ total }] = await AppDataSource.query(
-      `SELECT COUNT(*)::int AS total FROM tipos_pets`,
+      `SELECT COUNT(*)::int AS total FROM tipos`,
     );
 
     console.log(

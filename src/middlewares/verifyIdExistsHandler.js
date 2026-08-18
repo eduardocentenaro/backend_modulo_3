@@ -1,5 +1,5 @@
 // src/middlewares/carregarEntidade.js
-import { NOT_FOUND_ERROR } from "../constants/server.js";
+import { NOT_FOUND_STATUS } from "../constants/server.js";
 import { AppDataSource } from "../config/database_postgres.js";
 
 export const verifyIdExistsHandler =
@@ -12,7 +12,7 @@ export const verifyIdExistsHandler =
 
     if (!registro) {
       return response
-        .status(NOT_FOUND_ERROR)
+        .status(NOT_FOUND_STATUS)
         .send({ error: `${nomeAmigavel} não encontrado(a)` });
     }
 

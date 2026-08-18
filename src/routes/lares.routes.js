@@ -119,9 +119,7 @@ laresRoutes.get(
       const petsPresentes = [];
 
       for (const adocao of adocoesDoLar) {
-        const historicoOrdenado = [...adocao.historico].sort(
-          (a, b) => new Date(b.criado_em) - new Date(a.criado_em),
-        );
+        const historicoOrdenado = [...adocao.historico].sort((a, b) => b.id - a.id);
         const ultimoStatus = historicoOrdenado[0]?.status;
 
         if (ultimoStatus === STATUS_ADOCAO.FINALIZADO) {
@@ -203,23 +201,21 @@ laresRoutes.put(
       return;
     }
 
-    const larAtualizado = {
-      id: request.resgistro.id,
-    };
+    const lar = request.resgistro;
 
-    if (dados.nome !== undefined) larAtualizado.nome = dados.nome;
-    if (dados.cep !== undefined) larAtualizado.cep = dados.cep;
-    if (dados.estado !== undefined) larAtualizado.estado = dados.estado;
-    if (dados.cidade !== undefined) larAtualizado.cidade = dados.cidade;
-    if (dados.bairro !== undefined) larAtualizado.bairro = dados.bairro;
-    if (dados.rua !== undefined) larAtualizado.rua = dados.rua;
+    if (dados.nome !== undefined) lar.nome = dados.nome;
+    if (dados.cep !== undefined) lar.cep = dados.cep;
+    if (dados.estado !== undefined) lar.estado = dados.estado;
+    if (dados.cidade !== undefined) lar.cidade = dados.cidade;
+    if (dados.bairro !== undefined) lar.bairro = dados.bairro;
+    if (dados.rua !== undefined) lar.rua = dados.rua;
     if (dados.possui_telas_protecao !== undefined) {
-      larAtualizado.possui_telas_protecao = dados.possui_telas_protecao;
+      lar.possui_telas_protecao = dados.possui_telas_protecao;
     }
-    if (dados.tipo !== undefined) larAtualizado.tipo = dados.tipo;
-    if (dados.telefone !== undefined) larAtualizado.telefone = dados.telefone;
+    if (dados.tipo !== undefined) lar.tipo = dados.tipo;
+    if (dados.telefone !== undefined) lar.telefone = dados.telefone;
 
-    const larSalvo = await larAdotivoRepository.save(larAtualizado);
+    const larSalvo = await larAdotivoRepository.save(lar);
 
     response.status(OK_STATUS).send(larSalvo);
   }),
