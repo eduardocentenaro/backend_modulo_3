@@ -120,4 +120,84 @@ laresRoutes.get(
   }),
 );
 
+laresRoutes.put(
+  "/lares-adotivos/:id",
+  autorizarHandler(ROLES.ADMIN, ROLES.FUNCIONARIO),
+  verifyIdExistsHandler(LarAdotivoEntity, "Lar adotivo"),
+  asyncHandler(async (request, response) => {
+    const dados = request.body;
+
+    if (dados.nome !== undefined && (!dados.nome || typeof dados.nome !== "string")) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "nome não pode ser vazio" });
+      return;
+    }
+
+    if (dados.cep !== undefined && !/^\d{5}-\d{3}$/.test(dados.cep)) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "cep deve estar no formato xxxxx-xxx" });
+      return;
+    }
+
+    if (dados.estado !== undefined && !dados.estado) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "estado não pode ser vazio" });
+      return;
+    }
+
+    if (dados.cidade !== undefined && !dados.cidade) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "cidade não pode ser vazio" });
+      return;
+    }
+
+    if (dados.bairro !== undefined && !dados.bairro) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "bairro não pode ser vazio" });
+      return;
+    }
+
+    if (dados.rua !== undefined && !dados.rua) {
+      response.status(BAD_REQUEST_STATUS).send({ error: "rua não pode ser vazio" });
+      return;
+    }
+
+    if (dados.possui_telas_protecao !== undefined && typeof dados.possui_telas_protecao !== "boolean") {
+      response.status(BAD_REQUEST_STATUS).send({
+        error: "possui_telas_protecao deve ser true ou false",
+      });
+      return;
+    }
+
+    if (dados.tipo !== undefined && !TIPOS_LAR_VALIDOS.includes(dados.tipo)) {
+      response.status(BAD_REQUEST_STATUS).send({
+        error: `tipo deve ser um dos valores: ${TIPOS_LAR_VALIDOS.join(", ")}`,
+      });
+      return;
+    }
+
+    if (dados.telefone !== undefined && !/^\(\d{2}\) \d{5}-\d{4}$/.test(dados.telefone)) {
+      response.status(BAD_REQUEST_STATUS).send({
+        error: "telefone deve estar no formato (85) 99999-9999",
+      });
+      return;
+    }
+
+    const larAtualizado = {
+      id: request.resgistro.id,
+    };
+
+    if (dados.nome !== undefined) larAtualizado.nome = dados.nome;
+    if (dados.cep !== undefined) larAtualizado.cep = dados.cep;
+    if (dados.estado !== undefined) larAtualizado.estado = dados.estado;
+    if (dados.cidade !== undefined) larAtualizado.cidade = dados.cidade;
+    if (dados.bairro !== undefined) larAtualizado.bairro = dados.bairro;
+    if (dados.rua !== undefined) larAtualizado.rua = dados.rua;
+    if (dados.possui_telas_protecao !== undefined) {
+      larAtualizado.possui_telas_protecao = dados.possui_telas_protecao;
+    }
+    if (dados.tipo !== undefined) larAtualizado.tipo = dados.tipo;
+    if (dados.telefone !== undefined) larAtualizado.telefone = dados.telefone;
+
+    const larSalvo = await larAdotivoRepository.save(larAtualizado);
+
+    response.status(OK_STATUS).send(larSalvo);
+  }),
+);
+
 export default laresRoutes;
